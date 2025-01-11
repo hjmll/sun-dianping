@@ -21,9 +21,10 @@
   <div class="search-bar">
     <div class="city-btn">杭州 <i class="el-icon-arrow-down"></i></div>
     <div class="search-input">
-      <el-input size="mini" placeholder="请输入商户名、地点">
+      <el-input size="mini" placeholder="请输入商户名、地点" v-model="searchKeyword" class="custom-search-input">
         <i slot="prefix" class="el-input__icon el-icon-search"></i>
       </el-input>
+      <el-button type="primary" size="mini" @click="queryShopByName">搜索</el-button>
     </div>
     <div class="header-icon" @click="toPage(4)"><i class="el-icon-user"></i></div>
   </div>
@@ -66,13 +67,29 @@
       types: [], // 类型列表
       blogs: [], // 播客列表
       current: 1,// blog的页码
+      searchKeyword: ''
     },
     created() {
       // 查询类型
       this.queryTypes();
       this.queryHotBlogsScroll();
+      // 监听回车键事件
+      this.$refs.searchInput.addEventListener('keyup.enter', () => {
+        this.queryShopByName();
+      });
     },
     methods: {
+      toPage(i) {
+        if (i === 0) {
+          location.href = "/blog-edit.html"
+        } else if (i === 4) {
+          location.href = "/info.html"
+        } else if (i === 1){
+          location.href = "/"
+        } else if(i === 2){
+          location.href = "/map.html"
+        }
+      },
       queryTypes() {
         axios.get("/shop-type/list")
           .then(({data}) => {
@@ -111,6 +128,22 @@
             this.$message.error
             b.liked ++;
           })
+      },
+      queryShopByName() {
+        if (this.searchKeyword) {
+          axios.get("/shop/of/name", {
+            params: {
+              name: this.searchKeyword,
+              current: this.current
+            }
+          })
+                  .then(({data}) => {
+                    this.blogs = data;
+                  })
+                  .catch(err => {
+                    this.$message.error(err)
+                  })
+        }
       },
       onScroll(e) {
         let scrollTop = e.target.scrollTop;
