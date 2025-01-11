@@ -35,7 +35,7 @@ Vue.component("footBar", {
         location.href = "/info.html"
       } else if (i === 1){
         location.href = "/"
-      } else if(i == 2){
+      } else if(i === 2){
         location.href = "/map.html"
       }
     }
