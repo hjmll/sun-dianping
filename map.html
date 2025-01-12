@@ -27,11 +27,48 @@
 <div id="app"> <!-- 这里添加一个id用于挂载Vue实例，和info.html中的做法类似 -->
   <div id="wrapper"></div>
   <!-- 先执行地图初始化相关代码，确保在Vue实例影响页面布局前地图能正常初始化 -->
-  <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.8&key=7f3aaa68d2c88b2384542f122e85f15f"></script>
+  <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=7f3aaa68d2c88b2384542f122e85f15f"></script>
   <script>
     //初始化地图插件
     window.onload = function(){
       var map = new AMap.Map('wrapper');
+      // 确保AMap.Geolocation插件被加载
+      AMap.plugin('AMap.Geolocation', function() {
+        var geolocation = new AMap.Geolocation({
+          // 是否使用高精度定位，默认：true
+          enableHighAccuracy: true,
+          // 设置定位超时时间，默认：无穷大
+          timeout: 10000,
+          // 定位按钮的停靠位置的偏移量，默认：Pixel(10, 20)
+          buttonOffset: new AMap.Pixel(10, 20),
+          //  定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+          zoomToAccuracy: true,
+          // 定位按钮的排放位置，默认：'LB'，左下角
+          buttonPosition: 'LB'
+        });
+        // 将定位插件添加到地图上
+        map.addControl(geolocation);
+        // 地图加载完成后，进行定位操作
+        map.on('complete', function(){
+          // 定位成功后，返回定位信息
+          geolocation.getCurrentPosition(function(status,result){
+            if(status=='complete'){
+              // 定位成功，result为定位结果对象
+              console.log('定位成功', result);
+              // 可以根据定位结果做一些操作，例如标记定位位置等
+              var marker = new AMap.Marker({
+                position: new AMap.LngLat(result.position.lng, result.position.lat),
+                title: "您所在的位置"
+              });
+              map.add(marker);
+              map.setCenter(marker.getPosition());
+            }else{
+              // 定位失败，返回错误信息
+              console.log('定位失败', result);
+            }
+          });
+        });
+      });
     }
   </script>
 </div>
